@@ -1,0 +1,352 @@
+/* Custom styles for Payroll Infolist View - Light & Dark Mode Compatible */
+
+/* Hover effects for sections */
+.fi-section {
+    transition: all 0.3s ease;
+}
+
+.fi-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-section:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced section borders with dark mode support */
+.border-l-4.border-l-blue-500 {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(255, 255, 255, 0));
+}
+
+.dark .border-l-4.border-l-blue-500 {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.15), rgba(15, 23, 42, 0));
+}
+
+.border-l-4.border-l-green-500 {
+    background: linear-gradient(to right, rgba(34, 197, 94, 0.05), rgba(255, 255, 255, 0));
+}
+
+.dark .border-l-4.border-l-green-500 {
+    background: linear-gradient(to right, rgba(34, 197, 94, 0.15), rgba(15, 23, 42, 0));
+}
+
+.border-l-4.border-l-red-500 {
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 0));
+}
+
+.dark .border-l-4.border-l-red-500 {
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0));
+}
+
+.border-l-4.border-l-indigo-500 {
+    background: linear-gradient(to right, rgba(99, 102, 241, 0.05), rgba(255, 255, 255, 0));
+}
+
+.dark .border-l-4.border-l-indigo-500 {
+    background: linear-gradient(to right, rgba(99, 102, 241, 0.15), rgba(15, 23, 42, 0));
+}
+
+/* Money display enhancements */
+.fi-in-text-item-money {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Badge enhancements with dark mode */
+.fi-badge {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+}
+
+/* Circular image enhancements */
+.fi-in-image-item img {
+    transition: all 0.3s ease;
+    border: 3px solid rgba(59, 130, 246, 0.2);
+}
+
+.dark .fi-in-image-item img {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.fi-in-image-item:hover img {
+    transform: scale(1.05);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.dark .fi-in-image-item:hover img {
+    border-color: rgba(59, 130, 246, 0.6);
+}
+
+/* Final salary highlight */
+.transform.hover\:scale-105 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.transform.hover\:scale-105:hover {
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+}
+
+.dark .transform.hover\:scale-105:hover {
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+}
+
+/* Repeatable entry styling with dark mode */
+.fi-in-repeatable-item {
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.dark .fi-in-repeatable-item {
+    border-color: rgba(75, 85, 99, 0.5);
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+.fi-in-repeatable-item:hover {
+    background-color: rgba(249, 250, 251, 0.8);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark .fi-in-repeatable-item:hover {
+    background-color: rgba(51, 65, 85, 0.8);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Section header icons */
+.fi-section-header-icon {
+    color: rgba(59, 130, 246, 0.7);
+}
+
+.dark .fi-section-header-icon {
+    color: rgba(59, 130, 246, 0.8);
+}
+
+/* Performance badges with enhanced dark mode support */
+.fi-badge[data-color="success"] {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-badge[data-color="success"] {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #064e3b;
+    text-shadow: none;
+    font-weight: 600;
+}
+
+.fi-badge[data-color="warning"] {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-badge[data-color="warning"] {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #78350f;
+    text-shadow: none;
+    font-weight: 600;
+}
+
+.fi-badge[data-color="danger"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-badge[data-color="danger"] {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    color: #7f1d1d;
+    text-shadow: none;
+    font-weight: 600;
+}
+
+.fi-badge[data-color="info"] {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-badge[data-color="info"] {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #1e3a8a;
+    text-shadow: none;
+    font-weight: 600;
+}
+
+.fi-badge[data-color="gray"] {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fi-badge[data-color="gray"] {
+    background: linear-gradient(135deg, #9ca3af, #6b7280);
+    color: #111827;
+    text-shadow: none;
+    font-weight: 600;
+}
+
+/* Dark mode specific background enhancements */
+.dark .bg-green-50 {
+    background-color: rgba(6, 78, 59, 0.2) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.dark .bg-red-50 {
+    background-color: rgba(127, 29, 29, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark .bg-blue-50 {
+    background-color: rgba(30, 58, 138, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .bg-gray-50 {
+    background-color: rgba(17, 24, 39, 0.3) !important;
+    border-color: rgba(75, 85, 99, 0.3) !important;
+}
+
+/* Enhanced text colors for dark mode */
+.dark .text-green-600 {
+    color: #34d399 !important;
+}
+
+.dark .text-red-600 {
+    color: #f87171 !important;
+}
+
+.dark .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+.dark .text-gray-600 {
+    color: #9ca3af !important;
+}
+
+/* Border color adjustments for dark mode */
+.dark .border-green-200 {
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark .border-blue-300 {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.dark .border-gray-200 {
+    border-color: rgba(75, 85, 99, 0.3) !important;
+}
+
+/* Enhanced shadow effects for dark mode */
+.dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Money text styling for better contrast */
+.dark .fi-in-text-item-money {
+    color: #f3f4f6;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Section content text adjustments */
+.dark .fi-in-text-item {
+    color: #e5e7eb;
+}
+
+.dark .fi-in-text-item-label {
+    color: #d1d5db;
+}
+
+/* Prose content styling for dark mode */
+.dark .prose {
+    color: #d1d5db;
+}
+
+.dark .prose strong {
+    color: #f9fafb;
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: rgba(55, 65, 81, 0.3);
+    border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .fi-in-text-item-money {
+        font-size: 0.875rem;
+    }
+    
+    .transform.hover\:scale-105 {
+        transform: none;
+    }
+    
+    .fi-section:hover {
+        transform: none;
+    }
+    
+    .dark .fi-section:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .fi-section {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    
+    .fi-badge {
+        color: #000 !important;
+        background: #fff !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .transform.hover\:scale-105 {
+        transform: none !important;
+    }
+    
+    /* Reset dark mode for printing */
+    .dark .fi-badge {
+        color: #000 !important;
+        background: #fff !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .dark .bg-green-50,
+    .dark .bg-red-50,
+    .dark .bg-blue-50,
+    .dark .bg-gray-50 {
+        background-color: #fff !important;
+        border-color: #000 !important;
+    }
+}
