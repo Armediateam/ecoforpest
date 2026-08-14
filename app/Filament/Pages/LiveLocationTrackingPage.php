@@ -107,6 +107,7 @@ class LiveLocationTrackingPage extends Page implements HasForms
             ->whereHas('employee', fn(Builder $builder) => $this->applyEmployeeFilters($builder, $departmentId, $positionId))
             ->latest('updated_at')
             ->get()
+            ->toBase()
             ->map(function ($location) {
                 return [
                     'id' => $location->id,
@@ -163,6 +164,7 @@ class LiveLocationTrackingPage extends Page implements HasForms
             ->whereHas('employee', fn(Builder $builder) => $this->applyEmployeeFilters($builder, $departmentId, $positionId))
             ->latest('updated_at')
             ->get()
+            ->toBase()
             ->map(function (Attendance $attendance) {
                 $coordinates = $attendance->coordinate_clock_out ?: $attendance->coordinate_clock_in;
 
