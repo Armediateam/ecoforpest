@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\EmployeeLocations;
 use App\Models\Holiday;
 use App\Models\AccessRequest;
 use Illuminate\Http\Request;
@@ -389,6 +390,7 @@ class AttendanceController extends Controller
                         }
                     }
                     $prevAttendance->save();
+                    $this->syncEmployeeLocationFromAttendance($employee, $validated['coordinate_clock_out'] ?? null, 'attendance_clock_out');
                     return response()->json($prevAttendance);
                 }
             }
@@ -423,6 +425,7 @@ class AttendanceController extends Controller
                 }
             }
             $attendance->save();
+            $this->syncEmployeeLocationFromAttendance($employee, $validated['coordinate_clock_out'] ?? null, 'attendance_clock_out');
             return response()->json($attendance);
         } else {
             // Pastikan tidak membuat data baru jika sudah ada attendance hari ini
@@ -454,6 +457,7 @@ class AttendanceController extends Controller
             $validated['employee_id'] = $employee->id;
             $validated['date'] = $dateStr;
             $attendance = Attendance::create($validated);
+            $this->syncEmployeeLocationFromAttendance($employee, $validated['coordinate_clock_in'] ?? null, 'attendance_clock_in');
             return response()->json($attendance);
         }
     }
@@ -903,5 +907,24 @@ class AttendanceController extends Controller
         $merged['late_clock_in'] = (int) $merged['late_clock_in'];
         $merged['early_clock_out'] = (int) $merged['early_clock_out'];
         return $merged;
+    }
+
+    private function syncEmployeeLocationFromAttendance(Employee $employee, ?array $coordinates, string $source): void
+    {
+        if (
+            empty($coordinates['latitude']) ||
+            empty($coordinates['longitude'])
+        ) {
+            return;
+        }
+
+        EmployeeLocations::renewLocation([
+            'employee_id' => $employee->id,
+            'latitude' => $coordinates['latitude'],
+            'longitude' => $coordinates['longitude'],
+            'info' => [
+                'source' => $source,
+            ],
+        ]);
     }
 }

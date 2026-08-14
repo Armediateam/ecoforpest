@@ -3,16 +3,18 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use App\Models\Attendance;
 use App\Models\EmployeeLocations;
-use App\Models\Employee;
 use App\Models\Department;
 use App\Models\Position;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class LiveLocationTrackingPage extends Page implements HasForms
 {
@@ -47,6 +49,7 @@ class LiveLocationTrackingPage extends Page implements HasForms
         $this->form->fill([
             'department_id' => null,
             'position_id' => null,
+            'date' => now()->toDateString(),
         ]);
     }
 
@@ -76,9 +79,15 @@ class LiveLocationTrackingPage extends Page implements HasForms
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn($state) => $this->selectedPosition = $state),
+
+                DatePicker::make('date')
+                    ->label('Date')
+                    ->default(now())
+                    ->live()
+                    ->afterStateUpdated(fn($state) => $this->selectedDate = $state),
             ])
             ->statePath('data')
-            ->columns(2);
+            ->columns(3);
     }
 
     public function getLocationData()
@@ -86,47 +95,103 @@ class LiveLocationTrackingPage extends Page implements HasForms
         // Get filter values dari request atau form state
         $departmentId = request('department_id') ?? $this->data['department_id'] ?? null;
         $positionId = request('position_id') ?? $this->data['position_id'] ?? null;
+        $date = request('date') ?? $this->selectedDate ?? $this->data['date'] ?? now()->toDateString();
 
-        // Subquery to get the latest location ID per employee for today
+        // Subquery to get the latest location ID per employee for selected date
         $subQuery = EmployeeLocations::selectRaw('MAX(id) as id')
-            ->whereDate('updated_at', now())
+            ->whereDate('updated_at', $date)
             ->groupBy('employee_id');
 
-        $query = EmployeeLocations::with(['employee.position.department'])
+        $locations = EmployeeLocations::with(['employee.position.department'])
             ->whereIn('id', $subQuery)
-            ->whereHas('employee', function (Builder $builder) use ($departmentId, $positionId) {
-                $builder->where('status', 'active');
-
-                if ($departmentId) {
-                    $builder->whereHas('position.department', function (Builder $q) use ($departmentId) {
-                        $q->where('id', $departmentId);
-                    });
-                }
-
-                if ($positionId) {
-                    $builder->where('position_id', $positionId);
-                }
+            ->whereHas('employee', fn(Builder $builder) => $this->applyEmployeeFilters($builder, $departmentId, $positionId))
+            ->latest('updated_at')
+            ->get()
+            ->map(function ($location) {
+                return [
+                    'id' => $location->id,
+                    'employee_id' => $location->employee_id,
+                    'employee_name' => $location->employee->name,
+                    'employee_nik' => $location->employee->nik,
+                    'position' => $location->employee->position->title ?? 'N/A',
+                    'department' => $location->employee->position->department->name ?? 'N/A',
+                    'latitude' => (float) $location->latitude,
+                    'longitude' => (float) $location->longitude,
+                    'accuracy' => $location->accuracy ?? null,
+                    'info' => $location->info ? (is_string($location->info) ? $location->info : json_encode($location->info)) : null,
+                    'last_update' => $location->updated_at->toISOString(), // Use ISO format for better JavaScript parsing
+                    'last_update_formatted' => $location->updated_at->format('H:i:s'),
+                    'formatted_address' => $location->formatted_address,
+                    'photo_url' => $location->employee->photo_url,
+                    'status' => $location->employee->status,
+                ];
             });
 
-        return $query->latest('updated_at')->get()->map(function ($location) {
-            return [
-                'id' => $location->id,
-                'employee_id' => $location->employee_id,
-                'employee_name' => $location->employee->name,
-                'employee_nik' => $location->employee->nik,
-                'position' => $location->employee->position->title ?? 'N/A',
-                'department' => $location->employee->position->department->name ?? 'N/A',
-                'latitude' => (float) $location->latitude,
-                'longitude' => (float) $location->longitude,
-                'accuracy' => $location->accuracy ?? null,
-                'info' => $location->info ? (is_string($location->info) ? $location->info : json_encode($location->info)) : null,
-                'last_update' => $location->updated_at->toISOString(), // Use ISO format for better JavaScript parsing
-                'last_update_formatted' => $location->updated_at->format('H:i:s'),
-                'formatted_address' => $location->formatted_address,
-                'photo_url' => $location->employee->photo_url,
-                'status' => $location->employee->status,
-            ];
-        });
+        $employeeIdsWithLocations = $locations->pluck('employee_id');
+        $attendanceLocations = $this->getAttendanceLocationFallback($date, $departmentId, $positionId, $employeeIdsWithLocations);
+
+        return $locations
+            ->merge($attendanceLocations)
+            ->sortByDesc('last_update')
+            ->values();
+    }
+
+    private function applyEmployeeFilters(Builder $builder, $departmentId, $positionId): void
+    {
+        $builder->where('status', 'active');
+
+        if ($departmentId) {
+            $builder->whereHas('position.department', function (Builder $q) use ($departmentId) {
+                $q->where('id', $departmentId);
+            });
+        }
+
+        if ($positionId) {
+            $builder->where('position_id', $positionId);
+        }
+    }
+
+    private function getAttendanceLocationFallback($date, $departmentId, $positionId, Collection $excludedEmployeeIds): Collection
+    {
+        return Attendance::with(['employee.position.department'])
+            ->whereDate('date', $date)
+            ->whereNotIn('employee_id', $excludedEmployeeIds)
+            ->where(function (Builder $query) {
+                $query->whereNotNull('coordinate_clock_out')
+                    ->orWhereNotNull('coordinate_clock_in');
+            })
+            ->whereHas('employee', fn(Builder $builder) => $this->applyEmployeeFilters($builder, $departmentId, $positionId))
+            ->latest('updated_at')
+            ->get()
+            ->map(function (Attendance $attendance) {
+                $coordinates = $attendance->coordinate_clock_out ?: $attendance->coordinate_clock_in;
+
+                if (!is_array($coordinates) || empty($coordinates['latitude']) || empty($coordinates['longitude'])) {
+                    return null;
+                }
+
+                $lastUpdate = Carbon::parse($attendance->clock_out ?: $attendance->clock_in);
+
+                return [
+                    'id' => 'attendance-' . $attendance->id,
+                    'employee_id' => $attendance->employee_id,
+                    'employee_name' => $attendance->employee->name,
+                    'employee_nik' => $attendance->employee->nik,
+                    'position' => $attendance->employee->position->title ?? 'N/A',
+                    'department' => $attendance->employee->position->department->name ?? 'N/A',
+                    'latitude' => (float) $coordinates['latitude'],
+                    'longitude' => (float) $coordinates['longitude'],
+                    'accuracy' => null,
+                    'info' => json_encode(['source' => 'attendance']),
+                    'last_update' => $lastUpdate->toISOString(),
+                    'last_update_formatted' => $lastUpdate->format('H:i:s'),
+                    'formatted_address' => null,
+                    'photo_url' => $attendance->employee->photo_url,
+                    'status' => $attendance->employee->status,
+                ];
+            })
+            ->filter()
+            ->values();
     }
 
     public function getMapboxKey(): string

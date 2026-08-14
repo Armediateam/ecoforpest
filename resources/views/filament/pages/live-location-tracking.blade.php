@@ -543,9 +543,9 @@
 
                 // Get filter values
                 const formData = new FormData();
-                const departmentSelect = document.querySelector('select[name="data.department_id"]');
-                const positionSelect = document.querySelector('select[name="data.position_id"]');
-                const dateInput = document.querySelector('input[name="data.date"]');
+                const departmentSelect = document.querySelector('select[name="data.department_id"], select[name="data[department_id]"]');
+                const positionSelect = document.querySelector('select[name="data.position_id"], select[name="data[position_id]"]');
+                const dateInput = document.querySelector('input[name="data.date"], input[name="data[date]"]');
 
                 if (departmentSelect && departmentSelect.value) {
                     formData.append('department_id', departmentSelect.value);
