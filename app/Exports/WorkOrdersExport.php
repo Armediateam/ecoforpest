@@ -3,21 +3,18 @@
 namespace App\Exports;
 
 use App\Models\WorkOrder;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class WorkOrdersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class WorkOrdersExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading
 {
     public function __construct(private array $filters = [])
     {
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function collection()
+    public function query()
     {
         return WorkOrder::with(['service', 'lead', 'customer', 'assigned'])
             ->when($this->filterValues('status'), fn($query, $values) => $query->whereIn('status', $values))
@@ -35,8 +32,7 @@ class WorkOrdersExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             ->when($this->filterValue('amount_range', 'max_amount'), fn($query, $amount) => $query->where('total', '<=', $amount))
             ->when($this->filterBoolean('is_recuring') !== null, function ($query) {
                 $query->where('is_recuring', $this->filterBoolean('is_recuring'));
-            })
-            ->get();
+            });
     }
 
     public function map($wo): array
@@ -73,6 +69,11 @@ class WorkOrdersExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             'Assigned',
             'Date Created'
         ];
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     private function filterValue(string $filter, string $key = 'value'): mixed
