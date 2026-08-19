@@ -7,6 +7,7 @@ use App\Http\Controllers\ProposalTemplatePreviewHtmlController;
 use App\Http\Controllers\ProposalPreviewController;
 use App\Http\Controllers\ContractTemplatePreviewController;
 use App\Http\Controllers\ContractPreviewController;
+use App\Http\Controllers\WorkOrderExportController;
 use App\Filament\Pages\LiveLocationTrackingPage;
 
 Route::get('/', function () {
@@ -41,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('contracts/{contract}/preview', ContractPreviewController::class)
         ->name('contracts.preview');
+
+    Route::get('work-orders/export', WorkOrderExportController::class)
+        ->name('work-orders.export');
 
     Route::get('/invoices/create-clone', [\App\Http\Controllers\SecretInvoiceController::class, 'clone'])
         ->name('invoices.clone');
