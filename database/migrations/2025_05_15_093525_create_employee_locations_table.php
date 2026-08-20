@@ -16,12 +16,10 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
-            $table->geometry('position', subtype: 'POINT', srid: 4326)->nullable();
             $table->jsonb('info')->nullable();
             $table->timestamps();
 
             $table->index(['latitude', 'longitude']);
-            $table->spatialIndex(['position']);
         });
     }
 

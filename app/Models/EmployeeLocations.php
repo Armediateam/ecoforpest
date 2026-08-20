@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 class EmployeeLocations extends Model
 {
@@ -17,7 +16,6 @@ class EmployeeLocations extends Model
         'employee_id',
         'latitude',
         'longitude',
-        'position',
         'info',
     ];
 
@@ -53,12 +51,8 @@ class EmployeeLocations extends Model
             throw new \InvalidArgumentException('Latitude and longitude are required');
         }
 
-        // Create point geometry from latitude and longitude
-        $latitude = (float) $attributes['latitude'];
-        $longitude = (float) $attributes['longitude'];
-
-        // Set the position attribute using DB::raw
-        $attributes['position'] = DB::raw("ST_GeomFromText('POINT($longitude $latitude)', 4326)");
+        $attributes['latitude'] = (float) $attributes['latitude'];
+        $attributes['longitude'] = (float) $attributes['longitude'];
 
         // Use updateOrCreate to either update an existing record or create a new one
         $conditions = ['employee_id' => $attributes['employee_id']];
@@ -81,8 +75,7 @@ class EmployeeLocations extends Model
      */
     public static function findNearby(float $latitude, float $longitude, float $distanceInKm = 5)
     {
-        $point = "ST_GeomFromText('POINT($longitude $latitude)', 4326)";
-        $distance = "ST_Distance_Sphere($point, position)";
+        $distance = self::haversineSql($latitude, $longitude);
 
         return self::whereRaw("$distance <= ?", [$distanceInKm * 1000])
             ->selectRaw("*, $distance as distance")
@@ -109,14 +102,29 @@ class EmployeeLocations extends Model
      */
     public function distanceTo(float $latitude, float $longitude): ?float
     {
-        if (!$this->position) {
+        if (!$this->latitude || !$this->longitude) {
             return null;
         }
 
-        $point = "ST_GeomFromText('POINT($longitude $latitude)', 4326)";
-        $result = DB::selectOne("SELECT ST_Distance_Sphere({$point}, ?) as distance", [$this->position]);
+        $earthRadiusKm = 6371;
+        $latDelta = deg2rad($latitude - (float) $this->latitude);
+        $lonDelta = deg2rad($longitude - (float) $this->longitude);
+        $startLat = deg2rad((float) $this->latitude);
+        $endLat = deg2rad($latitude);
 
-        return $result ? round($result->distance / 1000, 2) : null;
+        $a = sin($latDelta / 2) ** 2
+            + cos($startLat) * cos($endLat) * sin($lonDelta / 2) ** 2;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return round($earthRadiusKm * $c, 2);
+    }
+
+    private static function haversineSql(float $latitude, float $longitude): string
+    {
+        $latitude = (float) $latitude;
+        $longitude = (float) $longitude;
+
+        return "(6371000 * 2 * ASIN(SQRT(POWER(SIN(RADIANS(latitude - {$latitude}) / 2), 2) + COS(RADIANS({$latitude})) * COS(RADIANS(latitude)) * POWER(SIN(RADIANS(longitude - {$longitude}) / 2), 2))))";
     }
 
     /**
